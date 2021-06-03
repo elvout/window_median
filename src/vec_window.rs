@@ -1,3 +1,4 @@
+use crate::WindowMedian;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 
@@ -16,10 +17,12 @@ impl<T: Ord + Copy> VecWindow<T> {
             sorted: Vec::with_capacity(cap),
         }
     }
+}
 
+impl<T: Ord + Copy> WindowMedian<T> for VecWindow<T> {
     /// Inserts an element into the window, evicting the oldest element
     /// if the window is at full capacity.
-    pub fn insert(&mut self, x: T) {
+    fn insert(&mut self, x: T) {
         let ipos = match self.sorted.binary_search(&x) {
             Ok(p) => p,
             Err(p) => p,
@@ -53,7 +56,7 @@ impl<T: Ord + Copy> VecWindow<T> {
     }
 
     /// Returns the median element of the window.
-    pub fn median(&self) -> Option<T> {
+    fn median(&self) -> Option<T> {
         let size = self.sorted.len();
 
         if size == 0 {

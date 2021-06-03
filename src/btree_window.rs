@@ -1,3 +1,4 @@
+use crate::WindowMedian;
 use std::cmp::Ordering;
 use std::collections::{BTreeSet, VecDeque};
 
@@ -16,54 +17,6 @@ impl<T: Ord + Copy> BTreeWindow<T> {
             items: VecDeque::with_capacity(cap),
             left: BTreeSet::new(),
             right: BTreeSet::new(),
-        }
-    }
-
-    /// Inserts an element into the window, evicting the oldest element
-    /// if the window is at full capacity.
-    pub fn insert(&mut self, x: T) {
-        if self.items.len() == self.cap {
-            self.remove();
-        }
-
-        self.items.push_back(x);
-
-        if !self.left.is_empty() {
-            let lmax = self.left.iter().next_back().unwrap();
-            if x < *lmax {
-                self.left.insert(x);
-            } else {
-                self.right.insert(x);
-            }
-        } else if !self.right.is_empty() {
-            let rmin = self.right.iter().next().unwrap();
-            if x > *rmin {
-                self.right.insert(x);
-            } else {
-                self.left.insert(x);
-            }
-        } else {
-            self.left.insert(x);
-        }
-
-        self.rebalance();
-    }
-
-    /// Returns the median element of the window.
-    pub fn median(&self) -> Option<T> {
-        let lsize = self.left.len();
-
-        // since the sets differ by at most 1, the larger set contains the median
-        match lsize.cmp(&self.right.len()) {
-            Ordering::Less => Some(*self.right.iter().next().unwrap()),
-            Ordering::Greater => Some(*self.left.iter().next_back().unwrap()),
-            Ordering::Equal => {
-                if lsize == 0 {
-                    None
-                } else {
-                    Some(*self.right.iter().next().unwrap())
-                }
-            }
         }
     }
 
@@ -99,6 +52,56 @@ impl<T: Ord + Copy> BTreeWindow<T> {
             for e in mv {
                 self.right.remove(&e);
                 self.left.insert(e);
+            }
+        }
+    }
+}
+
+impl<T: Ord + Copy> WindowMedian<T> for BTreeWindow<T> {
+    /// Inserts an element into the window, evicting the oldest element
+    /// if the window is at full capacity.
+    fn insert(&mut self, x: T) {
+        if self.items.len() == self.cap {
+            self.remove();
+        }
+
+        self.items.push_back(x);
+
+        if !self.left.is_empty() {
+            let lmax = self.left.iter().next_back().unwrap();
+            if x < *lmax {
+                self.left.insert(x);
+            } else {
+                self.right.insert(x);
+            }
+        } else if !self.right.is_empty() {
+            let rmin = self.right.iter().next().unwrap();
+            if x > *rmin {
+                self.right.insert(x);
+            } else {
+                self.left.insert(x);
+            }
+        } else {
+            self.left.insert(x);
+        }
+
+        self.rebalance();
+    }
+
+    /// Returns the median element of the window.
+    fn median(&self) -> Option<T> {
+        let lsize = self.left.len();
+
+        // since the sets differ by at most 1, the larger set contains the median
+        match lsize.cmp(&self.right.len()) {
+            Ordering::Less => Some(*self.right.iter().next().unwrap()),
+            Ordering::Greater => Some(*self.left.iter().next_back().unwrap()),
+            Ordering::Equal => {
+                if lsize == 0 {
+                    None
+                } else {
+                    Some(*self.right.iter().next().unwrap())
+                }
             }
         }
     }
