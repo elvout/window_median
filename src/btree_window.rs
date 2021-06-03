@@ -106,3 +106,82 @@ impl<T: Ord + Copy> WindowMedian<T> for BTreeWindow<T> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::BTreeWindow;
+    use crate::WindowMedian;
+    use rand::prelude::*;
+
+    fn check_sets(w: &BTreeWindow<u32>) {
+        let lsize = w.left.len() as isize;
+        let rsize = w.right.len() as isize;
+
+        assert!(isize::abs(lsize - rsize) <= 1);
+
+        if lsize > 0 && rsize > 0 {
+            let lmax = w.left.iter().next_back().unwrap();
+            let rmin = w.right.iter().next().unwrap();
+            assert!(*lmax <= *rmin);
+        }
+    }
+
+    #[test]
+    fn empty_median() {
+        let w = BTreeWindow::<u32>::new(5);
+        assert_eq!(None, w.median());
+    }
+
+    #[test]
+    fn median() {
+        let mut w = BTreeWindow::<u32>::new(6);
+        w.insert(6);
+        assert_eq!(Some(6), w.median());
+
+        w.insert(1);
+        assert_eq!(Some(6), w.median());
+
+        w.insert(5);
+        assert_eq!(Some(5), w.median());
+
+        w.insert(3);
+        assert_eq!(Some(5), w.median());
+
+        w.insert(2);
+        assert_eq!(Some(3), w.median());
+
+        w.insert(4);
+        assert_eq!(Some(4), w.median());
+    }
+
+    #[test]
+    fn insert_ascending() {
+        let mut w = BTreeWindow::<u32>::new(10);
+
+        for i in 0..100 {
+            w.insert(i);
+            check_sets(&w);
+        }
+    }
+
+    #[test]
+    fn insert_descending() {
+        let mut w = BTreeWindow::<u32>::new(10);
+
+        for i in 100..0 {
+            w.insert(i);
+            check_sets(&w);
+        }
+    }
+
+    #[test]
+    fn insert_random() {
+        let mut rng: StdRng = SeedableRng::seed_from_u64(678943567895);
+        let mut w = BTreeWindow::<u32>::new(10);
+
+        for _ in 0..100 {
+            w.insert(rng.next_u32());
+            check_sets(&w);
+        }
+    }
+}

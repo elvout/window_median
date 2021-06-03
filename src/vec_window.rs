@@ -66,3 +66,75 @@ impl<T: Ord + Copy> WindowMedian<T> for VecWindow<T> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::VecWindow;
+    use crate::WindowMedian;
+    use rand::prelude::*;
+
+    fn assert_sorted(w: &VecWindow<u32>) {
+        for i in 1..w.sorted.len() {
+            assert!(w.sorted[i - 1] <= w.sorted[i]);
+        }
+    }
+
+    #[test]
+    fn empty_median() {
+        let w = VecWindow::<u32>::new(5);
+        assert_eq!(None, w.median());
+    }
+
+    #[test]
+    fn median() {
+        let mut w = VecWindow::<u32>::new(6);
+        w.insert(6);
+        assert_eq!(Some(6), w.median());
+
+        w.insert(1);
+        assert_eq!(Some(6), w.median());
+
+        w.insert(5);
+        assert_eq!(Some(5), w.median());
+
+        w.insert(3);
+        assert_eq!(Some(5), w.median());
+
+        w.insert(2);
+        assert_eq!(Some(3), w.median());
+
+        w.insert(4);
+        assert_eq!(Some(4), w.median());
+    }
+
+    #[test]
+    fn insert_ascending() {
+        let mut w = VecWindow::<u32>::new(10);
+
+        for i in 0..100 {
+            w.insert(i);
+            assert_sorted(&w);
+        }
+    }
+
+    #[test]
+    fn insert_descending() {
+        let mut w = VecWindow::<u32>::new(10);
+
+        for i in 100..0 {
+            w.insert(i);
+            assert_sorted(&w);
+        }
+    }
+
+    #[test]
+    fn insert_random() {
+        let mut rng: StdRng = SeedableRng::seed_from_u64(678943567895);
+        let mut w = VecWindow::<u32>::new(10);
+
+        for _ in 0..100 {
+            w.insert(rng.next_u32());
+            assert_sorted(&w);
+        }
+    }
+}
