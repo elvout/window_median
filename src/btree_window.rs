@@ -10,7 +10,8 @@ pub struct BTreeWindow<T: Ord + Copy> {
 }
 
 impl<T: Ord + Copy> BTreeWindow<T> {
-    /// Constructs a new, empty `BTreeWindow<T>`.
+    /// Constructs a new, empty `BTreeWindow<T>` with the specified
+    /// capacity.
     pub fn new(cap: usize) -> BTreeWindow<T> {
         BTreeWindow {
             cap: cap,
@@ -89,10 +90,12 @@ impl<T: Ord + Copy> WindowMedian<T> for BTreeWindow<T> {
     }
 
     /// Returns the median element of the window.
+    /// Returns the greater element when the window size is even.
     fn median(&self) -> Option<T> {
         let lsize = self.left.len();
 
-        // since the sets differ by at most 1, the larger set contains the median
+        // since the sets differ in size by at most 1, the larger set
+        // contains the median
         match lsize.cmp(&self.right.len()) {
             Ordering::Less => Some(*self.right.iter().next().unwrap()),
             Ordering::Greater => Some(*self.left.iter().next_back().unwrap()),

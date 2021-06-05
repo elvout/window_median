@@ -9,7 +9,8 @@ pub struct VecWindow<T: Ord + Copy> {
 }
 
 impl<T: Ord + Copy> VecWindow<T> {
-    /// Constructs a new, empty `VecWindow<T>`.
+    /// Constructs a new, empty `VecWindow<T>` with the specified
+    /// capacity.
     pub fn new(cap: usize) -> VecWindow<T> {
         VecWindow {
             cap: cap,
@@ -39,13 +40,26 @@ impl<T: Ord + Copy> WindowMedian<T> for VecWindow<T> {
 
             match rpos.cmp(&ipos) {
                 Ordering::Equal => {
+                    //     rpos, ipos
+                    //     |
+                    // a b c e f g
                     self.sorted[rpos] = x;
                 }
                 Ordering::Less => {
+                    //     rpos    ipos
+                    //     |       |
+                    // a b c d e f h
+                    //      <~~~~^
+                    // insert(g)
                     self.sorted.copy_within(rpos + 1..ipos, rpos);
                     self.sorted[ipos - 1] = x;
                 }
                 Ordering::Greater => {
+                    //     ipos  rpos
+                    //     |     |
+                    // a b d e f g h
+                    //     ^~~~~>
+                    // insert(c)
                     self.sorted.copy_within(ipos..rpos, ipos + 1);
                     self.sorted[ipos] = x;
                 }
@@ -56,6 +70,7 @@ impl<T: Ord + Copy> WindowMedian<T> for VecWindow<T> {
     }
 
     /// Returns the median element of the window.
+    /// Returns the greater element when the window size is even.
     fn median(&self) -> Option<T> {
         let size = self.sorted.len();
 
