@@ -8,6 +8,9 @@ pub trait WindowMedian<T: Ord + Copy> {
 
     /// Returns the median element of the window.
     fn median(&self) -> Option<T>;
+
+    /// Removes all elements from the window.
+    fn clear(&mut self);
 }
 
 pub use btree_window::BTreeWindow;

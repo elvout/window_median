@@ -108,6 +108,13 @@ impl<T: Ord + Copy> WindowMedian<T> for BTreeWindow<T> {
             }
         }
     }
+
+    /// Removes all elements from the window.
+    fn clear(&mut self) {
+        self.items.clear();
+        self.left.clear();
+        self.right.clear();
+    }
 }
 
 #[cfg(test)]
@@ -186,5 +193,23 @@ mod tests {
             w.insert(rng.next_u32());
             check_sets(&w);
         }
+    }
+
+    #[test]
+    fn clear() {
+        let mut w = BTreeWindow::<u32>::new(10);
+
+        for i in 2..7 {
+            w.insert(i);
+        }
+        assert_eq!(Some(4), w.median());
+
+        w.clear();
+        assert_eq!(None, w.median());
+
+        for i in 12..17 {
+            w.insert(i);
+        }
+        assert_eq!(Some(14), w.median());
     }
 }
