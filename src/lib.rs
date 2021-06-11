@@ -11,6 +11,9 @@ pub trait WindowMedian<T: Ord + Copy> {
 
     /// Removes all elements from the window.
     fn clear(&mut self);
+
+    // Returns the number of elements in the window.
+    fn len(&self) -> usize;
 }
 
 pub use btree_window::BTreeWindow;

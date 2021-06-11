@@ -115,6 +115,11 @@ impl<T: Ord + Copy> WindowMedian<T> for BTreeWindow<T> {
         self.left.clear();
         self.right.clear();
     }
+
+    // Returns the number of elements in the window.
+    fn len(&self) -> usize {
+        self.items.len()
+    }
 }
 
 #[cfg(test)]

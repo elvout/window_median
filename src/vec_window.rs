@@ -86,6 +86,11 @@ impl<T: Ord + Copy> WindowMedian<T> for VecWindow<T> {
         self.items.clear();
         self.sorted.clear();
     }
+
+    // Returns the number of elements in the window.
+    fn len(&self) -> usize {
+        self.items.len()
+    }
 }
 
 #[cfg(test)]
