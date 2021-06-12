@@ -2,6 +2,7 @@ use crate::WindowMedian;
 use std::cmp::Ordering;
 use std::collections::VecDeque;
 
+#[derive(Debug)]
 pub struct VecWindow<T: Ord + Copy> {
     cap: usize,
     items: VecDeque<T>,

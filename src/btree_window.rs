@@ -2,6 +2,7 @@ use crate::WindowMedian;
 use std::cmp::Ordering;
 use std::collections::{BTreeSet, VecDeque};
 
+#[derive(Debug)]
 pub struct BTreeWindow<T: Ord + Copy> {
     cap: usize,
     items: VecDeque<T>,
